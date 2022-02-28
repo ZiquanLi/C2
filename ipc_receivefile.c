@@ -225,7 +225,6 @@ void ipcPipeReceive(int fd){
 		sleep(1);
     }
 	close(fd);
-	free(str1);
 }
 /* create a secured shared-memory object, updating a handle to it. */
 

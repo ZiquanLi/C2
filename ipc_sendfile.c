@@ -25,6 +25,7 @@
 int m_buff_size = 4096;
 int p_buff_size = 4096;
 void ipcMessagePassingSend(int fd);
+void ipcPipeSend(int fd);
 void ipcSharedMemorySend(int fd, int buffer_size);
 
 int main(int argc, char* argv[])
@@ -74,7 +75,7 @@ int main(int argc, char* argv[])
 				if(optarg==NULL){
 					buffer_size = 4;
 				}else{
-					buffer_size = optarg;
+					buffer_size = atoi(optarg);
 				}
 				method='s';
 				break;
@@ -193,7 +194,6 @@ void ipcPipeSend(int fd){
 		sent_size+=write_siez;
     }
 	close(fd);
-	free(arr1);
 }
 
 void ipcSharedMemorySend(int fd, int buffer_size){
