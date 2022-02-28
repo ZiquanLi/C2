@@ -24,7 +24,6 @@
 
 int m_buff_size = 4096;
 int p_buff_size = 4096;
-int getFileSize(int field_descriptor);
 void ipcMessagePassingSend(int fd);
 void ipcSharedMemorySend(int fd, int buffer_size);
 

@@ -39,7 +39,6 @@ typedef union
 	changed_shmem_msg_t changed_shmem;
 } recv_buf_t;
 
-int getFileSize(int field_descriptor);
 void ipcMessagePassingReceive(int fd);
 int create_shared_memory(unsigned nbytes, int client_pid, void **ptr, shm_handle_t *handle);
 void ipcSharedMemoryReceive(int fd);
