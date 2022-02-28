@@ -28,7 +28,7 @@ typedef union
 {
 	uint16_t msg_type;
 	struct _pulse pulse;
-	cksum_header_t cksum_hdr;
+	fileTransfer_header_t ft_hdr;
 } msg_buf_t;
 
 typedef union
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     int fd = -1;
     int longindex;
     int ch;
-    char method;
+    char method='0';
     static struct option longopts[] = {
         { "help", no_argument,  NULL, 'h' },
 		{ "messages", no_argument,  NULL, 'm' },
@@ -71,21 +71,21 @@ int main(int argc, char* argv[])
                 	printf("The file should be empty!");
                 break;
         case 'm':
-        		if(method!=0){
+        		if(method!='0'){
         			printf ("You can only choose one kind of method every time\n");
         			return EXIT_FAILURE;
         		}
         		method='m';
                 break;
         case 'p':
-				if(method!=0){
+				if(method!='0'){
 					printf ("You can only choose one kind of method every time\n");
 					return EXIT_FAILURE;
 				}
 				method='p';
 				break;
         case 's':
-				if(method!=0){
+				if(method!='0'){
 					printf ("You can only choose one kind of method every time\n");
 					return EXIT_FAILURE;
 				}
@@ -97,16 +97,19 @@ int main(int argc, char* argv[])
         default:
     	  		printf ("Usage: my_program [-m] for file transfer by message passing\n");
     	  		printf ("                  [-p] for file transfer by named pipe\n");
-    	  		printf ("                  [-s] for file transfer by shared memory,");
+    	  		printf ("                  [-s] for file transfer by shared memory\n");
     	  		printf ("                  [-f file_path] for choosing the target file\n");
     	  		printf ("                  [-h] for this help command\n");
     	  		printf ("                  note: sender and receiver should use the same method!\n");
-                return EXIT_FAILURE;
+    	  		printf ("                  note: Launch the receiver before sender!\n");
+    	  		printf ("                  note: the file to receive information should be existed before launching this receiver!\n");
+
+    	  		return EXIT_FAILURE;
         }
     }
 
     if(fd==-1){
-    	printf("the file to receive information has not been provided or error happens!");
+    	printf("the file to receive information has not been provided or error happens!\n");
     	return EXIT_FAILURE;
     }
     switch (method){
@@ -134,7 +137,7 @@ void ipcMessagePassingReceive(int fd){
 	int reply_status;
 	char* data;
 
-	attach = name_attach(NULL, CKSUM_SERVER_NAME, 0);
+	attach = name_attach(NULL, FileTransfer_SERVER_NAME, 0);
 	if (attach == NULL)
 	{
 		perror("name_attach");
@@ -154,10 +157,10 @@ void ipcMessagePassingReceive(int fd){
 		{ //msg
 			switch (msg.msg_type)
 			{
-			case CKSUM_IOV_MSG_TYPE:
+			case FilTransfer_IOV_MSG_TYPE:
 				printf("Received a checksum request msg, header says the data is %d bytes\n",
-						msg.cksum_hdr.data_size);
-				data = malloc(msg.cksum_hdr.data_size);
+						msg.ft_hdr.data_size);
+				data = malloc(msg.ft_hdr.data_size);
 				if (data == NULL)
 				{
 					if (MsgError(rcvid, ENOMEM ) == -1)
@@ -168,7 +171,7 @@ void ipcMessagePassingReceive(int fd){
 				}
 				else
 				{
-					status = MsgRead(rcvid, data, msg.cksum_hdr.data_size, sizeof(cksum_header_t));
+					status = MsgRead(rcvid, data, msg.ft_hdr.data_size, sizeof(fileTransfer_header_t));
 					if (status == -1)
 					{
 						perror("MsgRead");
@@ -176,7 +179,7 @@ void ipcMessagePassingReceive(int fd){
 					}
 
 
-					int write_size = write(fd, data, msg.cksum_hdr.data_size);
+					int write_size = write(fd, data, msg.ft_hdr.data_size);
 				    if( write_size == -1 ) {
 				        perror( "write error" );
 						exit(EXIT_FAILURE);

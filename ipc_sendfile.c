@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     int ch;
     //shared memory buffer size for sender
     int buffer_size;
-    char method;
+    char method='0';
     static struct option longopts[] = {
         { "help", no_argument,  NULL, 'h' },
         { "message", no_argument,  NULL, 'm' },
@@ -54,21 +54,21 @@ int main(int argc, char* argv[])
                     printf("      Unable to open the file '%s'\n", optarg);
                 break;
         case 'm':
-        		if(method!=0){
+        		if(method!='0'){
         			printf ("You can only choose one kind of method every time\n");
         			return EXIT_FAILURE;
         		}
         		method='m';
                 break;
         case 'p':
-				if(method!=0){
+				if(method!='0'){
 					printf ("You can only choose one kind of method every time\n");
 					return EXIT_FAILURE;
 				}
 				method='p';
 				break;
         case 's':
-				if(method!=0){
+				if(method!='0'){
 					printf ("You can only choose one kind of method every time\n");
 					return EXIT_FAILURE;
 				}
@@ -90,11 +90,12 @@ int main(int argc, char* argv[])
     	  		printf ("                  [-f file_path] for choosing the target file\n");
         	    printf ("                  [-h] for this help command\n");
         	    printf ("                  note: sender and receiver should use the same method!\n");
+        	    printf ("                  note: Launch the receiver before sender!\n");
                 return EXIT_FAILURE;
         }
     }
     if(fd==-1){
-    	printf("the file to send has not been provided or error happens!");
+    	printf("the file to send has not been provided or error happens!\n");
     	return EXIT_FAILURE;
     }
     switch (method){
@@ -137,14 +138,14 @@ void ipcMessagePassingSend(int fd){
     //now:buffer contains the file, and first "read_size(this is a number)" bytes of the buffer are useful
 
 	int coid; //Connection ID to server
-	cksum_header_t hdr; //msg header will specify how many bytes of data will follow
+	fileTransfer_header_t hdr; //msg header will specify how many bytes of data will follow
 	int reply_status;
 	int status; //status return value
 	iov_t siov[2]; //create a 2 part iov
 
 
 	// locate the server
-	coid = name_open(CKSUM_SERVER_NAME, 0);
+	coid = name_open(FileTransfer_SERVER_NAME, 0);
 	if (coid == -1)
 	{
 		perror("name_open");
@@ -153,7 +154,7 @@ void ipcMessagePassingSend(int fd){
 
 
 	// build the header
-	hdr.msg_type = CKSUM_IOV_MSG_TYPE;
+	hdr.msg_type = FilTransfer_IOV_MSG_TYPE;
 	hdr.data_size = read_size;
 
 	// setup the message as a two part iov, first the header then the data
