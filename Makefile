@@ -41,6 +41,6 @@ all: $(BINS)
 
 # dependencies
 
-ipc_receivefile.o: ipc_receivefile.c ipc_common.c
-ipc_sendfile.o: ipc_sendfile.c ipc_common.c
+ipc_receivefile.o: ipc_receivefile.c ipc_common.o
+ipc_sendfile.o: ipc_sendfile.c ipc_common.o
 
