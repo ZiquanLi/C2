@@ -90,11 +90,6 @@ int main(int argc, char* argv[])
 					printf ("You can only choose one kind of method every time\n");
 					return EXIT_FAILURE;
 				}
-				if(optarg==NULL){
-					buffer_size = 4;
-				}else{
-					buffer_size = optarg;
-				}
 				method='s';
 				break;
         //other situation
@@ -218,7 +213,6 @@ void ipcPipeReceive(int fd){
     int fifofd;
     // FIFO file path
 	int read_size=0;
-	int write_size=0;
     char * myfifo = "myfifo";
     // Creating the named file(FIFO)
     // mkfifo(<pathname>,<permission>)
@@ -228,7 +222,7 @@ void ipcPipeReceive(int fd){
     while (read_size!=0)
     {    
 		read_size = read(fifofd, str1, 80);
-        write_size = write(fd, str1, read_size);
+        write(fd, str1, read_size);
 		sleep(1);
     }
 	close(fd);
