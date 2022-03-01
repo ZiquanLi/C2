@@ -43,6 +43,7 @@ void ipcMessagePassingReceive(int fd);
 int create_shared_memory(unsigned nbytes, int client_pid, void **ptr, shm_handle_t *handle);
 void ipcSharedMemoryReceive(int fd);
 void ipcPipeReceive(int fd);
+int p_buff_size=80;
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +65,7 @@ int main(int argc, char* argv[])
 
         switch (ch) {
         case 'f':
-                if ((fd = open(optarg, O_WRONLY)) == -1)
+                if ((fd = open(optarg, O_WRONLY|O_CREAT)) == -1)
                 	printf("      Unable to open the file '%s'\n", optarg);
                 //the target file chosen by receiver should be empty
                 if(getFileSize(fd)!=0)
@@ -216,17 +217,17 @@ void ipcPipeReceive(int fd){
     // FIFO file path
 	int read_size=0;
     char * myfifo = "myfifo";
-    // Creating the named file(FIFO)
-    // mkfifo(<pathname>,<permission>)
     mkfifo(myfifo, 0666);
-    char str1[80];
+    char *buff=malloc(p_buff_size);
     fifofd = open(myfifo,O_RDONLY);
+    read_size = read(fifofd, buff, p_buff_size);
     while (read_size!=0)
     {    
-		read_size = read(fifofd, str1, 80);
-        write(fd, str1, read_size);
-		sleep(1);
+        write(fd, buff, read_size);
+        read_size = read(fifofd, buff, p_buff_size);
+        sleep(1);
     }
+    free(buff);
 	close(fd);
 }
 /* create a secured shared-memory object, updating a handle to it. */

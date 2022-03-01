@@ -23,7 +23,7 @@
 #include <string.h>
 
 int m_buff_size = 4096;
-int p_buff_size = 4096;
+int p_buff_size = 80;
 void ipcMessagePassingSend(int fd);
 void ipcPipeSend(int fd);
 void ipcSharedMemorySend(int fd, int buffer_size);
@@ -179,21 +179,20 @@ void ipcPipeSend(int fd){
     // FIFO file path
     int fileSize=getFileSize(fd);
 	int read_size=0;
-	int write_siez=0;
+	int write_size=0;
 	int sent_size=0;
 	char * myfifo = "myfifo";
-    // Creating the named file(FIFO)
-    // mkfifo(<pathname>, <permission>)
     mkfifo(myfifo, 0666);
-    char arr1[80];
+    char *buff=malloc(p_buff_size);
     fifofd = open(myfifo, O_WRONLY);
 	
     while (sent_size<fileSize)
     {
-        read_size=read(fd, arr1, sizeof(arr1));
-        write_siez=write(fifofd, arr1, read_size);
-		sent_size+=write_siez;
+        read_size=read(fd, buff, p_buff_size);
+        write_size=write(fifofd, buff, read_size);
+		sent_size+=write_size;
     }
+    free(buff);
 	close(fd);
 }
 
